@@ -125,6 +125,60 @@ app.post("/registeruser", (req, res) => {
     })
 });
 
+//usersbyid
+app.get('/userbyid',(req,res) => {
+    if(!req.session.user){
+        return res.redirect('/?errmessage=No Session Found! Please Login Again')
+    }
+    if(req.session.user.role !=="Admin" && req.session.user){
+        return res.redirect('/post?errmessage=You are Not Admin')
+    }
+    if(req.query.id){
+        db.collection('users').findOne({_id : mongodb.ObjectID(req.query.id)},(err,data)=>{
+        return res.send(data)
+    })
+}
+});
+
+//editUser
+app.put('/edituser',(req,res) => {
+    console.log(req.body)
+    let status;
+    if(req.body.isActive){
+        if(req.body.isActive=='true'){
+            status=true
+        }else{
+            status=false
+        }
+    }else{
+        status=false
+    }
+
+    db.collection('users').update(
+        {_id:mongodb.ObjectID(req.body._id)},
+        {
+            $set:{
+                name:req.body.name,
+                email:req.body.email,
+                role:req.body.role?req.body.role:'user',
+                isActive:status
+            }
+        },(err,result) =>{
+            if(err) throw err;
+            res.send('Data Updates')
+        }
+    )
+});
+
+app.delete('/deleteUser',(req,res) => {
+    let Id = mongodb.ObjectID(req.query.id);
+    db.collection(col_name).remove({_id:Id},(err,result) => {
+        if(err) throw err;
+        res.send("data")
+    })
+});
+
+
 MongoClient.connect(mongourl, (err, connection) => {
     if (err) throw err;
     db = connection.db("techblog");

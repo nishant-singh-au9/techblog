@@ -1,45 +1,198 @@
 <html lang="en">
+
 <head>
     <title>Tech Blog</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
 </head>
+
 <body>
     <div class="container">
         <nav class="navbar navbar-inverse">
             <div class="container-fluid">
-              <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">Tech Blog</a>
-              </div>
-              <div class="collapse navbar-collapse" id="myNavbar">
-                <ul class="nav navbar-nav">
-                  <li class="active"><a href="/post">Post</a></li>
-                  <li class="active"><a href="/post/addpost">Add Post</a></li>
-                  <% if (userdata.role === 'Admin'){ %>
-                    <li class="active"><a href="/allusers">Admin</a></li>
-                  <%}%>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                  <li><a href="/logoutuser"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-                </ul>
-              </div>
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">Tech Blog</a>
+                </div>
+                <div class="collapse navbar-collapse" id="myNavbar">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="/post">Post</a></li>
+                        <li class="active"><a href="/post/addpost">Add Post</a></li>
+                        <% if (userdata.role==='Admin' ){ %>
+                            <li class="active"><a href="/allusers">Admin</a></li>
+                            <%}%>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/logoutuser"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                    </ul>
+                </div>
             </div>
-          </nav>
+        </nav>
         <div class="row">
-          <center>
-            <h2>Hi <%= userdata.name %></h2>
-            <hr/>
-            <h1>this page is in development process, <span style="color:coral;">STAY TUNED</span>
-            </h1>
-        </center>
+            <center>
+                <h2>Hi Admin, <%= userdata.name %>
+                </h2>
+                <hr />
+            </center>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Active</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for (i=0; i<data.length; i++){%>
+                        <tr>
+                            <td>
+                                <%=data[i].name%>
+                            </td>
+                            <td>
+                                <%=data[i].email%>
+                            </td>
+                            <td>
+                                <%=data[i].role%>
+                            </td>
+                            <td>
+                                <%=data[i].isActive%>
+                            </td>
+                            <td>
+                                <button type="button" class="edit btn btn-info" data-toggle="modal"
+                                    data-target="#myedit" id="<%=data[i]._id%>">
+                                    <span class="glyphicon glyphicon-edit"></span>
+                                </button>
+                                <button type="button" class="delete btn btn-danger" id="<%=data[i]._id%>">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        <%}%>
+                </tbody>
+            </table>
+            <!--Modal here-->
+            <div class="modal" id="myedit">
+                <div class="modal-dialog">
+                    <div class="modal-content">
 
-            
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Edit User</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <form action="/editUser" method="POST" id="update_user">
+                                <input type="text" readonly class="form-control" id="update_id" name="_id">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input type="text" class="form-control" id="update_name"
+                                        placeholder="Enter First name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="update_email" placeholder="Enter Email"
+                                        name="email">
+                                </div>
+                                <label for="name">User Type:</label>
+                                <label class="radio-inline">
+                                    <input type="radio" id="update_type" name="role" value="User" />
+                                    User
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" id="update_type" name="role" value="Admin" />
+                                    Admin
+                                </label>
+                                <div>
+                                    <label for="name">User Status:</label>
+                                    <label class="radio-inline">
+                                        <input type="radio" id="update_active" name="isActive" value="true" />
+                                        Active
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" id="update_active" name="isActive" value="false" />
+                                        InActive
+                                    </label>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="mclose btn btn-danger" data-dismiss="modal">Close</button>
+                            <button type="submit" id="update_table" class="btn btn-primary">update</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-    
+    <script>
+        //jquery to activate user or deactivate
+        $('.edit').click(function () {
+            id = this.id
+            $.ajax({
+                type: 'get',
+                url: `/userbyid?id=${id}`,
+                success: function (data) {
+                    $('#update_id').attr("value", data._id);
+                    $('#update_name').attr("value", data.name);
+                    $('#update_email').attr("value", data.email);
+                    $('input[type=radio][value=' + data.role + ']').attr('checked', true)
+                    $('input[type=radio][value=' + data.isActive + ']').attr('checked', true)
+
+                }
+            })
+        })
+        $('.mclose').click(function () {
+            $('input[type=radio]').attr('checked', false)
+        })
+
+        $('#update_table').click(function () {
+            var data = $('#update_user').serialize()
+            console.log("data going>>>", data)
+            $.ajax({
+                url: '/edituser',
+                type: 'PUT',
+                data: data,
+                success: function (data) {
+                    window.location.reload()
+                },
+                error: function () {
+                    alert('No Update')
+                }
+            })
+        })
+
+        $('.delete').click(function () {
+            id = this.id
+            console.log(id)
+            $.ajax({
+                url: `/deleteUser?id=${id}`,
+                type: 'delete',
+                data: data,
+                success: function (data) {
+                    window.location.reload()
+                },
+                error: function () {
+                    alert('No Update')
+                }
+            })
+        })
+    </script>
+
 </body>
+
 </html>
