@@ -88,14 +88,14 @@ app.get('/logoutuser', (req, res) => {
 //route to check all users
 app.get('/allusers', (req, res) => {
     if (!req.session.user){
-        return res.status(404).send('No session found, try logging to see all the user info')
+        return res.redirect('/?errmessage=No session found, login to see all the users info')
     }
     if (req.session.user.role !== 'Admin'){
-        return res.status(203).send('you are not an admin')
+        return res.redirect('/post/?errmessage=Only admins can see the users details')
     }
     db.collection('users').find().toArray((err, data) => {
         if (err) throw err 
-        return res.status(200).send(data)
+        return res.render('users', {data, userdata: req.session.user})
     })
 })
 
