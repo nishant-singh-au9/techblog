@@ -1,0 +1,67 @@
+<html lang="en">
+<head>
+    <title>Tech Blog</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Tech Blog</a>
+              </div>
+              <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                  <li class="active"><a href="/post">Post</a></li>
+                  <li class="active"><a href="/post/addpost">Add Post</a></li>
+                  <% if (userdata.role === 'Admin'){ %>
+                    <li class="active"><a href="/allusers">Admin</a></li>
+                  <%}%>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                  <li><a href="/logoutuser"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        <div class="row">
+          <center>
+            <h2>Hi <%= userdata.name %></h2>
+            <hr/>
+        </center>
+            <div class="offset-md-5 col-md-5">
+                <h2 style="color:red"><%=errmessage%></h2>
+                <% for (i=0; i<postdata.length; i++){%>
+                    <div class="row">
+                      <div class="col-md-10">
+                        <h2 ><%=postdata[i].title%></h2>
+                        <h3 ><%=postdata[i].description%></h3>
+                        <p>Tags : <%=postdata[i].tags%> </p>
+                        <p >Creator: <%=postdata[i].createdBy%></p>
+                        <p >Created On: <%=postdata[i].createdDate%></p>
+                        <p >Last Updated: <%=postdata[i].lastUpdated%></p>
+                      </div>
+                      <div class="col-md-2">
+                        <% if(postdata[i].createrId==userdata._id ||userdata.role=="Admin" ){%>
+                         <a href="/post/edit/<%=postdata[i]._id%>">
+                           <span class="glyphicon glyphicon-edit"></span>
+                         </a>
+                         <a href="/post/deletePost/<%=postdata[i]._id%>">
+                           <span class="glyphicon glyphicon-trash"></span>
+                         </a>
+                         <%}%>
+                       </div>
+                    </div>
+                    <hr/>
+                    <%}%>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
