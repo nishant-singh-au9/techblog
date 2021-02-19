@@ -12,6 +12,11 @@ MongoClient.connect(mongourl, (err, connection) => {
 });
 
 postRouter.route("/").get((req, res) => {
+    if (!req.session.user) {
+        return res.redirect(
+            "/?errmessage=You are not logged in to view posts, login first"
+        )
+    }
     db.collection("posts")
         .find({isActive : true})
         .toArray((err, data) => {
@@ -45,16 +50,20 @@ postRouter.route("/adduserpost").post((req, res) => {
         return res.redirect(
             "/?errmessage=You are not logged in, login to add post"
         );
+    }else if(req.session.user.isActive === false){
+        return res.redirect('/post/?errmessage=you are not allowed to add post, contact admin')
     } else {
         let data = {
             title: req.body.title,
             description: req.body.description,
             createdBy: req.session.user.name,
             createrId: req.session.user._id,
+            createrEmail : req.session.user.email,
             isActive: true,
             tags: req.body.tags,
             createdDate: new Date(Date.now()).toISOString(),
             lastUpdated: new Date(Date.now()).toISOString(),
+            comments : []
         };
 
         db.collection("posts").insert(data, (err, result) => {
@@ -110,6 +119,51 @@ postRouter.route('/deletePost/:id')
             }
         )
     })
+
+postRouter.route('/postDetail/:id')
+    .get((req, res) => {
+        if(!req.session.user){
+            res.redirect('/?errmessage=No session Found! Login First')
+        }
+        let Id = mongodb.ObjectID(req.params.id)
+        db.collection('posts').findOne({_id:Id, isActive:true},(err, data) => {
+            if (err) throw err
+            let revComment = data.comments.reverse()
+            return res.render('postDetails', {postdata : data, userdata:req.session.user, comments: revComment})
+        })
+    })
+postRouter.route('/addcomment/:id')
+    .post((req, res) => {
+    if(!req.session.user){
+        res.redirect('/?errmessage=No session Found! Login First')
+    }
+    let Id = mongodb.ObjectID(req.params.id)
+    let newCommentArray
+    db.collection('posts').findOne({_id:Id, isActive:true},(err, data) => {
+        newCommentArray = data.comments
+        console.log("data..>>>>>>", data)
+    let commentdata = {
+        comment : req.body.comment,
+        commenter : req.session.user.name,
+        commenterEmail : req.session.user.email,
+        time : new Date(Date.now()).toISOString()
+    }
+    newCommentArray.push(commentdata)
+    console.log("newarray >>>>>>",newCommentArray)
+    db.collection('posts').update(
+        {_id : Id},
+        {
+            $set:{
+                comments : newCommentArray
+            }
+        }, (err, result) => {
+            if (err) throw err
+            return res.redirect(`/post/postDetail/${req.params.id}`)
+        }
+    )
+
+})
+})
 
 
 module.exports = postRouter;

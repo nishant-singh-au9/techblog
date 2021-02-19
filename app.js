@@ -9,7 +9,6 @@ const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const port = process.env.PORT || 9001;
 let db;
-let col_name = "users";
 const postRouter = require('./src/routes/postRoutes')
 
 app.use(cors()); //handling cross origin resource sharing error
@@ -20,6 +19,11 @@ app.use(
         secret: "youCanGiveAnyValueHere",
     })
 );
+
+MongoClient.connect(mongourl, (err, connection) => {
+    if (err) throw err;
+    db = connection.db("techblog");
+});
 
 //static path
 app.use(express.static(__dirname+'/public'))
@@ -170,19 +174,14 @@ app.put('/edituser',(req,res) => {
     )
 });
 
-app.delete('/deleteUser',(req,res) => {
-    let Id = mongodb.ObjectID(req.query.id);
-    db.collection(col_name).remove({_id:Id},(err,result) => {
+app.get('/deleteUser/:id',(req,res) => {
+    db.collection('users').remove({_id:mongodb.ObjectID(req.query.id)},(err,result) => {
         if(err) throw err;
-        res.send("data")
+        console.log(mongodb.ObjectID(req.query.id))
+        res.redirect("/allusers")
     })
 });
 
-
-MongoClient.connect(mongourl, (err, connection) => {
-    if (err) throw err;
-    db = connection.db("techblog");
-});
 
 app.listen(port, (err) => {
     if (err) throw err;
